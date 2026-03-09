@@ -1,3 +1,5 @@
+from abc import ABC, abstractmethod
+
 class Book:
     def __init__(self, title, author, year):
         self.title = title
@@ -6,8 +8,22 @@ class Book:
 
     def __str__(self):
         return f"Title: {self.title}, Author: {self.author}, Year: {self.year}"
+    
+class LibraryInterface(ABC):
+    @abstractmethod
+    def add_book(self, book: Book):
+        pass
 
-class Library:
+    @abstractmethod
+    def remove_book(self, title: str):
+        pass
+
+    @abstractmethod
+    def show_books(self):
+        pass
+
+
+class Library(LibraryInterface):
     def __init__(self):
         self.books = []
 
