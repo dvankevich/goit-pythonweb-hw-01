@@ -11,23 +11,18 @@ class Library:
     def __init__(self):
         self.books = []
 
-    def add_book(self, title, author, year):
-        book = {
-            "title": title,
-            "author": author,
-            "year": year
-        }
+    def add_book(self, book: Book):
         self.books.append(book)
 
-    def remove_book(self, title):
+    def remove_book(self, title: str):
         for book in self.books:
-            if book["title"] == title:
+            if book.title == title:
                 self.books.remove(book)
                 break
 
     def show_books(self):
         for book in self.books:
-            print(f'Title: {book["title"]}, Author: {book["author"]}, Year: {book["year"]}')
+            print(book)
 
 def main():
     library = Library()
@@ -39,7 +34,7 @@ def main():
             title = input("Enter book title: ").strip()
             author = input("Enter book author: ").strip()
             year = input("Enter book year: ").strip()
-            library.add_book(title, author, year)
+            library.add_book(Book(title, author, year))
         elif command == "remove":
             title = input("Enter book title to remove: ").strip()
             library.remove_book(title)
