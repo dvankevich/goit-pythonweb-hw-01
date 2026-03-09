@@ -1,16 +1,58 @@
 from abc import ABC, abstractmethod
 
 class Book:
-    pass
+    def __init__(self, title, author, year):
+        self.title = title
+        self.author = author
+        self.year = year
 
+    def __str__(self):
+        return f"Title: {self.title}, Author: {self.author}, Year: {self.year}"
+    
 class LibraryInterface(ABC):
-    pass
+    @abstractmethod
+    def add_book(self, book: Book):
+        pass
+
+    @abstractmethod
+    def remove_book(self, title: str):
+        pass
+
+    @abstractmethod
+    def show_books(self):
+        pass
+
 
 class Library(LibraryInterface):
-    pass
+    def __init__(self):
+        self.books = []
+
+    def add_book(self, book: Book):
+        self.books.append(book)
+
+    def remove_book(self, title: str):
+        for book in self.books:
+            if book.title == title:
+                self.books.remove(book)
+                break
+
+    def show_books(self):
+        for book in self.books:
+            print(book)
 
 class LibraryManager:
-    pass
+    def __init__(self, library: LibraryInterface):
+        self.library = library
+
+    def add_book(self, title, author, year):
+        new_book = Book(title, author, year)
+        self.library.add_book(new_book)
+
+    def remove_book(self, title):
+        self.library.remove_book(title)
+
+    def show_books(self):
+        self.library.show_books()
 
 def main():
     library = Library()
@@ -37,3 +79,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
