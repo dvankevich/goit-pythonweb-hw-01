@@ -37,9 +37,12 @@ class Library(LibraryInterface):
 
     def remove_book(self, title: str) -> None:
         for book in self.books:
-            if book["title"] == title:
+            if book.title == title:
                 self.books.remove(book)
-                break
+                logger.info(f"Book removed: {title}")
+                break  
+        else:
+            logger.warning(f"Book with title '{title}' not found.")
 
     def show_books(self) -> None:
         if not self.books:
@@ -84,7 +87,7 @@ def main() -> None:
                 case "show":
                     manager.show_books()
                 case "exit":
-                    logger.info("Exiting the program. Goodbye!")
+                    logger.info("Goodbye!")
                     break
                 case _:
                     logger.warning("Invalid command. Please try again.")
