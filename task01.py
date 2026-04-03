@@ -4,22 +4,35 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 
 class Vehicle(ABC):
-    def __init__(self, make: str, model:str, spec:str) -> None:
+    def __init__(self, make: str, model: str) -> None:
         self.make = make
         self.model = model
-        self.spec = spec
 
     @abstractmethod
     def start_engine(self) -> None:
         pass
 
-class Car(Vehicle):
+class Car(Vehicle, ABC):
+    pass
+
+class Motorcycle(Vehicle, ABC):
+    pass
+
+class USCar(Car):
     def start_engine(self) -> None:
-        logging.info(f"Car: {self.make} {self.model} ({self.spec}) - Двигун запущено")
-        
-class Motorcycle(Vehicle):
+        logging.info(f"Car: {self.make} {self.model} (US Spec) - Двигун запущено")
+
+class USMotorcycle(Motorcycle):
     def start_engine(self) -> None:
-        logging.info(f'Motorcycle: {self.make} {self.model} ({self.spec}) — Мотор заведено')
+        logging.info(f"Motorcycle: {self.make} {self.model} (US Spec) - Мотор заведено")
+
+class EUCar(Car):
+    def start_engine(self) -> None:
+        logging.info(f"Car: {self.make} {self.model} (EU Spec) - Двигун запущено")
+
+class EUMotorcycle(Motorcycle):
+    def start_engine(self) -> None:
+        logging.info(f"Motorcycle: {self.make} {self.model} (EU Spec) - Мотор заведено")
 
 class VehicleFactory(ABC):
     @abstractmethod
@@ -32,29 +45,29 @@ class VehicleFactory(ABC):
 
 class USVehicleFactory(VehicleFactory):
     def create_car(self, make: str, model: str) -> Car:
-        return Car(make, model, "US Spec")
+        return USCar(make, model)
 
     def create_motorcycle(self, make: str, model: str) -> Motorcycle:
-        return Motorcycle(make, model, "US Spec")
+        return USMotorcycle(make, model)
 
 class EUVehicleFactory(VehicleFactory):
     def create_car(self, make: str, model: str) -> Car:
-        return Car(make, model, "EU Spec")
+        return EUCar(make, model)
 
     def create_motorcycle(self, make: str, model: str) -> Motorcycle:
-        return Motorcycle(make, model, "EU Spec")
+        return EUMotorcycle(make, model)
 
-def client_code(factory: VehicleFactory)-> None:
+
+def client_code(factory: VehicleFactory) -> None:
     car = factory.create_car("Ford", "Mustang")
     bike = factory.create_motorcycle("Harley-Davidson", "Sportster")
     
     car.start_engine()
     bike.start_engine()
 
-print("--- USA market ---")
-us_factory = USVehicleFactory()
-client_code(us_factory)
+if __name__ == "__main__":
+    print("--- USA market ---")
+    client_code(USVehicleFactory())
 
-print("--- EU market ---")
-eu_factory = EUVehicleFactory()
-client_code(eu_factory)
+    print("--- EU market ---")
+    client_code(EUVehicleFactory())
