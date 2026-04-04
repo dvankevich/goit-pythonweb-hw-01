@@ -1,0 +1,17 @@
+[
+    {
+        "title": "book1",
+        "author": "auth1",
+        "year": "2001"
+    },
+    {
+        "title": "book2",
+        "author": "author2",
+        "year": "2012"
+    },
+    {
+        "title": "Книга 1",
+        "author": "Автор 1",
+        "year": "2005"
+    }
+]

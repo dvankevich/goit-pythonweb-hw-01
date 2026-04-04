@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import logging
 from typing import List
+import json
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger(__name__)
@@ -47,6 +48,47 @@ class Library(IBookCommand, IBookQuery):
 
     def get_all_books(self) -> List[Book]:
         return self._books
+    
+class FileLibrary(Library):
+    """
+    store library in JSON file
+    """
+    def __init__(self, filename: str = "library_data.json") -> None:
+        super().__init__()
+        self.filename = filename
+        self._load_from_file()
+
+    def _save_to_file(self) -> None:
+        try:
+            data = [
+                {"title": b.title, "author": b.author, "year": b.year} 
+                for b in self._books
+            ]
+            with open(self.filename, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=4)
+            logger.info(f"Дані записано у файл {self.filename}")
+        except Exception as e:
+            logger.error(f"Помилка запису: {e}")
+
+    def _load_from_file(self) -> None:
+        """load data from file"""
+        try:
+            with open(self.filename, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                self._books = [Book(**item) for item in data]
+            logger.info(f"Завантажено {len(self._books)} книг з файлу.")
+        except FileNotFoundError:
+            logger.info("Файл даних не знайдено, створено нову базу.")
+        except Exception as e:
+            logger.error(f"Помилка читання: {e}")
+
+    def add_book(self, book: Book) -> None:
+        super().add_book(book)
+        self._save_to_file()
+
+    def remove_book(self, title: str) -> None:
+        super().remove_book(title)
+        self._save_to_file()
 
 class LoggingLibrary(Library):
     def add_book(self, book: Book) -> None:
@@ -75,7 +117,8 @@ class LibraryManager:
             logger.info(str(book))
 
 def main() -> None:
-    storage = LoggingLibrary() 
+    #storage = LoggingLibrary() 
+    storage = FileLibrary("my_library.json")
     
     manager = LibraryManager(storage, storage)
 
