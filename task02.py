@@ -1,20 +1,20 @@
 from abc import ABC, abstractmethod
 import logging
-from typing import List, Optional
+from typing import List
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger(__name__)
 
 class Book:
     def __init__(self, title: str, author: str, year: str) -> None:
-        self.title: str = title
-        self.author: str = author
-        self.year: str = year
+        self.title = title
+        self.author = author
+        self.year = year
 
     def __str__(self) -> str:
         return f"Title: {self.title}, Author: {self.author}, Year: {self.year}"
 
-class LibraryInterface(ABC):
+class IBookCommand(ABC):
     @abstractmethod
     def add_book(self, book: Book) -> None:
         pass
@@ -23,67 +23,74 @@ class LibraryInterface(ABC):
     def remove_book(self, title: str) -> None:
         pass
 
+class IBookQuery(ABC):
     @abstractmethod
-    def show_books(self) -> None:
+    def get_all_books(self) -> List[Book]:
         pass
 
-class Library(LibraryInterface):
+class Library(IBookCommand, IBookQuery):
     def __init__(self) -> None:
-        self.books: List[Book] = []
+        self._books: List[Book] = []
 
     def add_book(self, book: Book) -> None:
-        self.books.append(book)
+        self._books.append(book)
         logger.info(f"Book added: {book.title}")
 
     def remove_book(self, title: str) -> None:
-        for book in self.books:
+        for book in self._books:
             if book.title == title:
-                self.books.remove(book)
+                self._books.remove(book)
                 logger.info(f"Book removed: {title}")
-                break  
+                break
         else:
-            logger.warning(f"Book with title '{title}' not found.")
+            logger.warning(f"Book '{title}' not found.")
+
+    def get_all_books(self) -> List[Book]:
+        return self._books
+
+class LoggingLibrary(Library):
+    def add_book(self, book: Book) -> None:
+        logger.info("Спроба додати книгу")
+        super().add_book(book)
+
+class LibraryManager:
+    def __init__(self, command_channel: IBookCommand, query_channel: IBookQuery) -> None:
+        self.commands = command_channel
+        self.queries = query_channel
+
+    def add_book(self, title: str, author: str, year: str) -> None:
+        self.commands.add_book(Book(title, author, year))
+
+    def remove_book(self, title: str) -> None:
+        self.commands.remove_book(title)
 
     def show_books(self) -> None:
-        if not self.books:
+        books = self.queries.get_all_books()
+        if not books:
             logger.info("Library is empty.")
             return
         
-        logger.info("--- Library Collection ---")
-        for book in self.books:
+        logger.info("--- Current Collection ---")
+        for book in books:
             logger.info(str(book))
 
-class LibraryManager:
-    def __init__(self, library: LibraryInterface) -> None:
-        self.library: LibraryInterface = library
-
-    def add_book(self, title: str, author: str, year: str) -> None:
-        new_book = Book(title, author, year)
-        self.library.add_book(new_book)
-
-    def remove_book(self, title: str) -> None:
-        self.library.remove_book(title)
-
-    def show_books(self) -> None:
-        self.library.show_books()
-
 def main() -> None:
-    library: LibraryInterface = Library()
-    manager: LibraryManager = LibraryManager(library)
+    storage = LoggingLibrary() 
+    
+    manager = LibraryManager(storage, storage)
 
     while True:
         try:
-            command: str = input("Enter command (add, remove, show, exit): ").strip().lower()
+            cmd = input("Enter command (add, remove, show, exit): ").strip().lower()
 
-            match command:
+            match cmd:
                 case "add":
                     title: str = input("Enter book title: ").strip()
                     author: str = input("Enter book author: ").strip()
                     year: str = input("Enter book year: ").strip()
                     manager.add_book(title, author, year)
                 case "remove":
-                    title: str = input("Enter book title to remove: ").strip()
-                    manager.remove_book(title)
+                    manager.remove_book(input("Title to remove: "))
                 case "show":
                     manager.show_books()
                 case "exit":
